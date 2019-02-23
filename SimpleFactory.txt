@@ -1,0 +1,80 @@
+#include <iostream>
+#include <vector>
+#include <memory>
+ 
+enum class Side
+{
+    China,
+    America,
+    GLA
+};
+ 
+class Warrior
+{
+public:
+    virtual void attack() = 0;
+};
+ 
+class ChineeseWarrior : public Warrior
+{
+public:
+    void attack() override { std::cout << "Han dzi dzio!!!" << std::endl; }    
+};
+ 
+class AmericanWarrior : public Warrior
+{
+public:
+    void attack() override { std::cout << "Arrgggghhh!!!" << std::endl; }    
+};
+ 
+class GLAWarrior : public Warrior
+{
+    void attack() override { std::cout << "To the victory!" << std::endl; }  
+};
+ 
+class WarriorFactory
+{
+public:
+    static std::unique_ptr<Warrior> createWarrior(Side side)
+    {
+        switch (side)
+            {
+                case Side::China:
+                    return std::make_unique<ChineeseWarrior>();
+                break;
+                case Side::America:
+                    return std::make_unique<AmericanWarrior>();
+                break;
+                case Side::GLA:
+                    return std::make_unique<GLAWarrior>();
+                break;
+            }
+    }
+};
+ 
+class Player
+{
+public:
+    Player(Side side) {
+        m_army.reserve(defaultArmyCount);
+        for (size_t i = 0; i < defaultArmyCount; ++i) {
+               m_army.push_back(WarriorFactory::createWarrior(side));
+        }
+    }
+    void startAttack() {
+        for (const auto& warrior : m_army)
+        {
+            warrior->attack();
+        }
+    }
+    static const size_t defaultArmyCount {3};
+private:
+    std::vector<std::unique_ptr<Warrior>> m_army;
+};
+ 
+int main()
+{
+    Player player (Side::GLA);
+    player.startAttack();
+    return 0;
+}

@@ -1,0 +1,158 @@
+ 
+#include <iostream>
+#include <vector>
+#include <memory>
+ 
+enum class Side
+{
+    China,
+    America,
+    GLA
+};
+ 
+class Warrior
+{
+public:
+    virtual void attack() = 0;
+};
+ 
+class Worker
+{
+public:
+    virtual void work() = 0;  
+};
+ 
+class ChineeseWorker : public Worker
+{
+public:
+    void work() override { std::cout << "For the mother China!" << std::endl;  }
+};
+ 
+class AmericanWorker : public Worker
+{
+public:
+    void work() override { std::cout << "When you will pay me?" << std::endl;  }
+};
+ 
+class GLAWorker : public Worker
+{
+public:
+    void work() override { std::cout << "I need shoes..." << std::endl;  }
+};
+ 
+class ChineeseWarrior : public Warrior
+{
+public:
+    void attack() override { std::cout << "Han dzi dzio!!!" << std::endl; }    
+};
+ 
+class AmericanWarrior : public Warrior
+{
+public:
+    void attack() override { std::cout << "Arrgggghhh!!!" << std::endl; }    
+};
+ 
+class GLAWarrior : public Warrior
+{
+    void attack() override { std::cout << "To the victory!" << std::endl; }  
+};
+ 
+class Factory
+{
+public:
+    virtual std::unique_ptr<Warrior> createWarrior() const = 0;
+    virtual std::unique_ptr<Worker> createWorker() const = 0;
+};
+ 
+class GLAFactory : public Factory
+{
+public:
+    std::unique_ptr<Warrior> createWarrior() const override
+    {
+        return std::make_unique<GLAWarrior>();
+    }
+    std::unique_ptr<Worker> createWorker() const override
+    {
+        return std::make_unique<GLAWorker>();
+    }
+};
+ 
+class AmericanFactory : public Factory
+{
+public:
+    std::unique_ptr<Warrior> createWarrior() const override
+    {
+        return std::make_unique<AmericanWarrior>();
+    }
+    std::unique_ptr<Worker> createWorker() const override
+    {
+        return std::make_unique<AmericanWorker>();
+    }
+};
+ 
+class ChineeseFactory : public Factory
+{
+public:
+    std::unique_ptr<Warrior> createWarrior() const override
+    {
+        return std::make_unique<ChineeseWarrior>();
+    }
+    std::unique_ptr<Worker> createWorker() const override
+    {
+        return std::make_unique<ChineeseWorker>();
+    }
+};
+ 
+class Player
+{
+public:
+    Player(Factory& factory) : m_factory {factory} {}
+    void setupArmy() {
+        m_army.reserve(defaultArmyCount);
+        for (size_t i = 0; i < defaultArmyCount; ++i) {
+           m_army.push_back(m_factory.createWarrior());
+        }
+        for (size_t i = 0; i < defaultWorkersCount; ++i) {
+           m_workers.push_back(m_factory.createWorker());
+        }
+    }
+    void startAttack() {
+        for (const auto& warrior : m_army)
+        {
+            warrior->attack();
+        }
+    }
+    void startWork() {
+        for (const auto& worker : m_workers)
+        {
+            worker->work();
+        }
+    }
+    static const size_t defaultArmyCount {3};
+    static const size_t defaultWorkersCount {5};
+private:
+    std::vector<std::unique_ptr<Warrior>> m_army;
+    std::vector<std::unique_ptr<Worker>> m_workers;
+    const Factory& m_factory;
+};
+ 
+class Game
+{
+public:
+    Player player1;
+    Player player2;
+};
+ 
+int main()
+{
+    static GLAFactory glaFactory {};
+    static AmericanFactory americanFactory {};
+    Game game {Player {glaFactory}, Player {americanFactory}};
+   
+    game.player1.setupArmy();
+    game.player1.startWork();
+   
+    game.player2.setupArmy();
+    game.player2.startWork();
+    return 0;
+}

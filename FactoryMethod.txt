@@ -1,0 +1,99 @@
+
+#include <iostream>
+#include <vector>
+#include <memory>
+ 
+enum class Side
+{
+    China,
+    America,
+    GLA
+};
+ 
+class Warrior
+{
+public:
+    virtual void attack() = 0;
+};
+ 
+class ChineeseWarrior : public Warrior
+{
+public:
+    void attack() override { std::cout << "Han dzi dzio!!!" << std::endl; }    
+};
+ 
+class AmericanWarrior : public Warrior
+{
+public:
+    void attack() override { std::cout << "Arrgggghhh!!!" << std::endl; }    
+};
+ 
+class GLAWarrior : public Warrior
+{
+    void attack() override { std::cout << "To the victory!" << std::endl; }  
+};
+ 
+class Player
+{
+public:
+    virtual std::unique_ptr<Warrior> createWarrior() = 0;
+    void setupArmy() {
+        m_army.reserve(defaultArmyCount);
+        for (size_t i = 0; i < defaultArmyCount; ++i) {
+               m_army.push_back(createWarrior());
+        }
+    }
+    void startAttack() {
+        for (const auto& warrior : m_army)
+        {
+            warrior->attack();
+        }
+    }
+    static const size_t defaultArmyCount {3};
+private:
+    std::vector<std::unique_ptr<Warrior>> m_army;
+};
+ 
+class GLAPlayer : public Player
+{
+public:
+    std::unique_ptr<Warrior> createWarrior() override {
+        return std::make_unique<GLAWarrior>();
+    }
+};
+ 
+class AmericaPlayer : public Player
+{
+public:
+    std::unique_ptr<Warrior> createWarrior() override {
+        return std::make_unique<AmericanWarrior>();
+    }
+};
+ 
+class ChinaPlayer : public Player
+{
+public:
+    std::unique_ptr<Warrior> createWarrior() override {
+        return std::make_unique<ChineeseWarrior>();
+    }
+};
+ 
+class Game
+{
+public:
+    std::unique_ptr<Player> player1;
+    std::unique_ptr<Player> player2;
+};
+ 
+int main()
+{
+    Game game;
+    game.player1 = std::make_unique<GLAPlayer>();
+    game.player1->setupArmy();
+   
+    game.player2 = std::make_unique<ChinaPlayer>();
+    game.player2->setupArmy();
+   
+    game.player1->startAttack();
+    return 0;
+}
